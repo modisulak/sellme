@@ -5,12 +5,14 @@ import { useNavigate } from 'react-router-dom';
 // @ts-ignore
 import AlertError from '../AlertError';
 import ItemForm from '../ItemForm';
+import { ItemContext, ItemProps } from '../../contexts/ItemContext';
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { user, signOut, error } = useContext(UserContext);
   const [location, setLocation] = useState({});
+  const { items } = useContext(ItemContext);
 
   const navigate = useNavigate();
 
@@ -248,7 +250,19 @@ function Header() {
           <div className='py-6'>
             <div className='px-4 mx-auto max-w-7xl sm:px-6 md:px-8'>
               <h1 className='text-lg text-neutral-600'></h1>
-              {isFormOpen ? <ItemForm /> : <Feed />}
+              {isFormOpen ? (
+                <ItemForm />
+              ) : (
+                <div className='relative px-4 py-12 sm:px-6 lg:py-16 lg:px-8'>
+                  <div className='relative mx-auto max-w-7xl'>
+                    <div className='grid max-w-lg gap-5 mx-auto lg:grid-cols-3 lg:max-w-none'>
+                      {items.map((item) => (
+                        <Feed item={item} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             {/* <div className='px-4 mx-auto max-w-7xl sm:px-6 md:px-8'>
               <div className='py-4'>

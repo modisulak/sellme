@@ -1,18 +1,54 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import Autocomplete from 'react-google-autocomplete';
+import { useNavigate } from 'react-router-dom';
+// @ts-ignore
+import { v4 as uuid } from 'uuid';
 // @ts-ignore
 import Geocode from 'react-geocode';
 import.meta.env.DEV;
+import { ItemContext, ItemProps } from '../contexts/ItemContext';
 
 function ItemForm() {
+  const navigate = useNavigate();
+  const [name, setName] = useState('modi');
+  const [itemDesc, setItemDesc] = useState();
+  const [price, setPrice] = useState('');
+  const [title, setTitle] = useState('');
   const [selectedFile, setSelectedFile] = useState();
+  const [location, setLocation] = useState('');
   const [isFilePicked, setIsFilePicked] = useState(false);
+  const { addItem } = useContext(ItemContext);
+
+  const formRef = useRef<HTMLFormElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const changeHandler = (event: React.FormEvent) => {
     // @ts-ignore
     setSelectedFile(event.target.files[0]);
     setIsFilePicked(true);
   };
+
+  function handleAddItem(e: React.FormEvent) {
+    e.preventDefault();
+
+    const content = inputRef.current?.value;
+
+    if (!content) return;
+
+    const newItem: ItemProps = {
+      itemId: uuid(),
+      userId: name,
+      itemDesc: content,
+      itemLocation: location,
+      itemTitle: title,
+      itemPrice: price,
+      itemPicture: selectedFile,
+    };
+    console.log(newItem);
+    addItem(newItem);
+    formRef.current?.reset();
+    navigate('/home');
+  }
 
   Geocode.setApiKey(import.meta.env.VITE_GOOGLE_API_KEY);
   return (
@@ -25,7 +61,7 @@ function ItemForm() {
             Enter details about the item you want to sell.
           </p>
         </div>
-        <form className='mt-8 space-y-3' action='#' method='POST'>
+        <form className='mt-8 space-y-3' onSubmit={handleAddItem} ref={formRef}>
           <div className='grid grid-cols-1 space-y-2'>
             <label className='block mb-2 text-sm font-medium text-gray-900 dark:text-white'>
               What do you want to sell?
@@ -34,6 +70,11 @@ function ItemForm() {
               className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
               type=''
               placeholder='A lawnmower'
+              value={title}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setTitle(e.target.value)
+              }
+              required
             />
           </div>
           <div className='mb-6'>
@@ -42,6 +83,7 @@ function ItemForm() {
             </label>
             <input
               type='text'
+              ref={inputRef}
               id='large-input'
               className='block w-full p-4 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
             />
@@ -59,16 +101,20 @@ function ItemForm() {
                 style={{ width: '300px' }}
                 apiKey={import.meta.env.VITE_GOOGLE_API_KEY}
                 onPlaceSelected={(place) => {
-                  Geocode.fromAddress(place.formatted_address).then(
-                    (response: any) => {
-                      const { lat, lng } =
-                        response.results[0].geometry.location;
-                      console.log(lat, lng);
-                    },
-                    (error: any) => {
-                      console.error(error);
-                    }
-                  );
+                  // Geocode.fromAddress(place.formatted_address).then(
+                  //   (response: any) => {
+                  //     const { lat, lng } =
+                  //       response.results[0].geometry.location;
+                  //     setLocation({
+                  //       latitude: lat,
+                  //       longitude: lng,
+                  //     });
+                  //   },
+                  //   (error: any) => {
+                  //     console.error(error);
+                  //   }
+                  // );
+                  setLocation(place.formatted_address);
                   console.log(place.formatted_address);
                 }}
               />
@@ -86,6 +132,10 @@ function ItemForm() {
                 className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
                 placeholder='AUD 9999'
                 pattern='[0-9]'
+                value={price}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setPrice(e.target.value)
+                }
                 required
               />
             </div>

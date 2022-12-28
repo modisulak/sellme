@@ -1,21 +1,43 @@
 import React, { createContext, useState, useEffect } from 'react';
 
-export const TasksContext = createContext({} as TasksContextProps);
+export const ItemContext = createContext({} as ItemsContextProps);
 
-export interface TaskProps {
+export interface ItemProps {
   itemId: string;
   userId: string;
+  itemTitle: string;
   itemDesc: string;
-  itemLocation: [];
-  itemPrice: number;
+  itemLocation: string;
+  itemPrice: string;
+  itemPicture: File;
 }
 
-interface TasksContextProps {
-  tasks: TaskProps[];
-  addTask: (newTask: TaskProps) => void;
-  removeTask: (id: string) => void;
-  updateCheckedStatus: (updatedTask: TaskProps, checked: boolean) => void;
-  updateDate: (updatedTask: TaskProps, date: string) => void;
-  updateTaskColor: (slugBeingUpdated: string, color: string) => void;
-  changeTasksOrder: (result: TaskProps[]) => void;
+interface ItemsContextProps {
+  items: ItemProps[];
+  addItem: (newItem: ItemProps) => void;
 }
+
+interface Props {
+  children?: React.ReactNode;
+}
+
+function ItemsProvider({ children }: Props) {
+  const initialItems = JSON.parse(localStorage.getItem('itemSoldBy') || '[]');
+  const [items, setItems] = useState<ItemProps[]>(initialItems);
+
+  const addItem = (newItem: ItemProps) => {
+    setItems((prevItems) => [newItem, ...prevItems]);
+  };
+
+  const updateTasks = useEffect(() => {
+    localStorage.setItem('itemSoldBy', JSON.stringify(items));
+  }, [items]);
+
+  return (
+    <ItemContext.Provider value={{ items, addItem }}>
+      {children}
+    </ItemContext.Provider>
+  );
+}
+
+export default ItemsProvider;
