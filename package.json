@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/react-router-dom": "^5.3.3",
     "aws-amplify": "^5.0.7",
     "flowbite": "^1.5.5",
     "flowbite-react": "^0.3.7",

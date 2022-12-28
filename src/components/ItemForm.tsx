@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Autocomplete from 'react-google-autocomplete';
+// @ts-ignore
 import Geocode from 'react-geocode';
 import.meta.env.DEV;
 
-export default function ItemForm() {
+function ItemForm() {
   const [selectedFile, setSelectedFile] = useState();
   const [isFilePicked, setIsFilePicked] = useState(false);
 
@@ -120,11 +121,13 @@ export default function ItemForm() {
                       </div>
                       <p className='mb-2 text-sm text-gray-500 dark:text-gray-400'>
                         <span className='font-semibold flex items-center justify-center'>
+                          \{/* @ts-ignore */}
                           {selectedFile.name}
                         </span>{' '}
                       </p>
                       <p className='text-xs text-gray-500 dark:text-gray-400'>
-                        {selectedFile.type}{' '}
+                        {/* @ts-ignore */}
+                        {selectedFile.type} {/* @ts-ignore */}
                         {Math.round(selectedFile.size / (1024).toFixed(3))} KB
                       </p>
                     </div>
@@ -236,3 +239,5 @@ export default function ItemForm() {
     </div>
   );
 }
+
+export default ItemForm;

@@ -1,7 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react';
 import Feed from '../Feed/Feed';
-import { UserContext } from '../../contexts/UserContext.jsx';
+import { UserContext } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
+// @ts-ignore
 import AlertError from '../AlertError';
 import ItemForm from '../ItemForm';
 
@@ -37,7 +38,7 @@ function Header() {
     navigate('/login');
   };
   return (
-    <div className=' home-container flex overflow-hidden bg-white rounded-lg'>
+    <div className=' home-container flex  overflow-hidden bg-white rounded-lg'>
       {error ? <AlertError error={error} /> : null}
       <div className='hidden md:flex md:flex-shrink-0'>
         <div className='flex flex-col w-64'>
