@@ -1,4 +1,6 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { getAllItems } from '../api/Api';
+import { UserContext } from './UserContext';
 
 export const ItemContext = createContext({} as ItemsContextProps);
 
@@ -9,7 +11,7 @@ export interface ItemProps {
   itemDesc: string;
   itemLocation: string;
   itemPrice: string;
-  itemPicture: File;
+  itemPicture: string;
 }
 
 interface ItemsContextProps {
@@ -22,8 +24,18 @@ interface Props {
 }
 
 function ItemsProvider({ children }: Props) {
-  const initialItems = JSON.parse(localStorage.getItem('itemSoldBy') || '[]');
-  const [items, setItems] = useState<ItemProps[]>(initialItems);
+  const [items, setItems] = useState<ItemProps[]>([]);
+  const { user } = useContext(UserContext);
+
+  const fetchItems = async () => {
+    const response = await getAllItems();
+    // console.log(response);
+    setItems(response);
+  };
+
+  useEffect(() => {
+    fetchItems();
+  }, [user]);
 
   const addItem = (newItem: ItemProps) => {
     setItems((prevItems) => [newItem, ...prevItems]);

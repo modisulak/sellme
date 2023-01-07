@@ -7,8 +7,11 @@ import { v4 as uuid } from 'uuid';
 import Geocode from 'react-geocode';
 import.meta.env.DEV;
 import { ItemContext, ItemProps } from '../contexts/ItemContext';
+import { createItem } from '../api/Api';
 
 function ItemForm() {
+  Geocode.setApiKey(import.meta.env.VITE_GOOGLE_API_KEY);
+
   const navigate = useNavigate();
   const [name, setName] = useState('modi');
   const [itemDesc, setItemDesc] = useState();
@@ -19,22 +22,38 @@ function ItemForm() {
   const [isFilePicked, setIsFilePicked] = useState(false);
   const { addItem } = useContext(ItemContext);
 
+  const config = {
+    bucketName: import.meta.env.VITE_REACT_APP_BUCKET_NAME,
+    region: import.meta.env.VITE_REACT_APP_REGION,
+    accessKeyId: import.meta.env.VITE_REACT_APP_ACCESS,
+    secretAccessKey: import.meta.env.VITE_REACT_APP_SECRET,
+  };
+
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
+  const convertToBase64 = (blob: any) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   const changeHandler = (event: React.FormEvent) => {
     // @ts-ignore
     setSelectedFile(event.target.files[0]);
     setIsFilePicked(true);
   };
 
-  function handleAddItem(e: React.FormEvent) {
-    e.preventDefault();
-
+  async function handleAddItem(event: React.FormEvent) {
+    event.preventDefault();
     const content = inputRef.current?.value;
-
     if (!content) return;
-
+    // @ts-ignore
+    console.log('TEST IF CONTENT WORKS');
+    const fileInfo = await convertToBase64(fileRef.current?.files[0]);
+    console.log('B', fileInfo);
     const newItem: ItemProps = {
       itemId: uuid(),
       userId: name,
@@ -42,15 +61,15 @@ function ItemForm() {
       itemLocation: location,
       itemTitle: title,
       itemPrice: price,
-      itemPicture: selectedFile,
+      itemPicture: fileInfo,
     };
     console.log(newItem);
     addItem(newItem);
+    createItem(newItem);
     formRef.current?.reset();
     navigate('/home');
   }
 
-  Geocode.setApiKey(import.meta.env.VITE_GOOGLE_API_KEY);
   return (
     <div className='relative flex items-center justify-center h-95v py-12 px-4 sm:px-6 lg:px-8  bg-no-repeat bg-cover relative items-center'>
       <div className='absolute inset-0 z-0' />
@@ -101,21 +120,7 @@ function ItemForm() {
                 style={{ width: '300px' }}
                 apiKey={import.meta.env.VITE_GOOGLE_API_KEY}
                 onPlaceSelected={(place) => {
-                  // Geocode.fromAddress(place.formatted_address).then(
-                  //   (response: any) => {
-                  //     const { lat, lng } =
-                  //       response.results[0].geometry.location;
-                  //     setLocation({
-                  //       latitude: lat,
-                  //       longitude: lng,
-                  //     });
-                  //   },
-                  //   (error: any) => {
-                  //     console.error(error);
-                  //   }
-                  // );
                   setLocation(place.formatted_address);
-                  console.log(place.formatted_address);
                 }}
               />
             </div>
@@ -131,7 +136,7 @@ function ItemForm() {
                 id='phone'
                 className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
                 placeholder='AUD 9999'
-                pattern='[0-9]'
+                pattern='[0-9]*'
                 value={price}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setPrice(e.target.value)
@@ -171,7 +176,7 @@ function ItemForm() {
                       </div>
                       <p className='mb-2 text-sm text-gray-500 dark:text-gray-400'>
                         <span className='font-semibold flex items-center justify-center'>
-                          \{/* @ts-ignore */}
+                          {/* @ts-ignore */}
                           {selectedFile.name}
                         </span>{' '}
                       </p>
@@ -214,6 +219,7 @@ function ItemForm() {
                   id='dropzone-file'
                   type='file'
                   className='hidden'
+                  ref={fileRef}
                   onChange={changeHandler}
                 />
               </label>

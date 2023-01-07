@@ -24,10 +24,19 @@ interface Props {
 }
 
 function UserContextProvider({ children }: Props) {
-  const [user, setUser] = useState<UserProps>({
-    username: '',
-  });
+  const [user, setUser] = useState<UserProps>({ username: '' });
   const [error, setError] = useState('');
+  const [token, setToken] = useState('');
+
+  useEffect(() => {
+    Auth.currentUserInfo().then((user) => {
+      setUser({ username: user.username });
+    });
+  }, []);
+
+  useEffect(() => {
+    setError('');
+  }, [user]);
 
   async function signUp(username: string, password: string, email: string) {
     return await new Promise((resolve, reject) => {
@@ -84,11 +93,7 @@ function UserContextProvider({ children }: Props) {
     return await new Promise((resolve, reject) => {
       Auth.signIn(username, password)
         .then(function (data) {
-          localStorage.setItem(
-            AUTH_USER_TOKEN_KEY,
-            data.signInUserSession.accessToken.jwtToken
-          );
-          setUser(data);
+          setToken(data.signInUserSession.accessToken.jwtToken);
           resolve(data);
         })
         .catch(function (err) {
@@ -97,10 +102,6 @@ function UserContextProvider({ children }: Props) {
         });
     });
   }
-
-  useEffect(() => {
-    setError('');
-  }, [user]);
 
   const signOut = async (): Promise<any> => {
     try {
