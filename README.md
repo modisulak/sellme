@@ -1,1 +1,3 @@
-![](https://github.com/modisulak/sellme/blob/main/008221c4af7ee36fd7de803451c3cb6d.mp4)
+
+https://user-images.githubusercontent.com/48191259/211195259-38d5cbfe-21b2-471d-b4de-cbbffd2f4320.mp4
+
